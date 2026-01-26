@@ -1,6 +1,9 @@
 import mongoose from "mongoose";
+import dotenv from 'dotenv';
 
-const MONGO_URL = process.env.MONGO_URL || 'mongodb://localhost:27017/PingUp'
+dotenv.config();
+
+const MONGO_URL = process.env.MONGO_URL || 'mongodb://localhost:27017/PingUp';
 
 async function connectDB() {
   try {
