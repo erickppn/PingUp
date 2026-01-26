@@ -2,7 +2,7 @@ import Fastify from 'fastify';
 import { fastifyPlugin } from 'inngest/fastify';
 import { inngest } from './inngest/client';
 
-export const app = Fastify({
+const app = Fastify({
   logger: true
 });
 
@@ -14,3 +14,5 @@ app.register(fastifyPlugin, {
   client: inngest,
   functions: []
 });
+
+export default app;
