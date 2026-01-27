@@ -19,6 +19,7 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
+    "@clerk/fastify": "^2.6.17",
     "@fastify/cors": "^11.2.0",
     "@fastify/multipart": "^9.3.0",
     "dotenv": "^17.2.3",

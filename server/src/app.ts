@@ -1,5 +1,6 @@
 import Fastify from 'fastify';
 import { fastifyPlugin } from 'inngest/fastify';
+import { clerkPlugin } from '@clerk/fastify'
 
 import { inngest } from './inngest/client';
 import { functions } from './inngest/functions';
@@ -8,6 +9,9 @@ import { functions } from './inngest/functions';
 const app = Fastify({
   logger: true
 });
+
+// Adds the auth Clerk Plugin
+app.register(clerkPlugin)
 
 app.get('/', (request, reply) => {
   reply.send('Server is running :)')
