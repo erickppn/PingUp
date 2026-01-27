@@ -12,8 +12,10 @@ export const clerkUserCreation = inngest.createFunction(
     
     let username = email_addresses[0].email_address.split('@')[0];
 
-    //Check availability of username
-    const user = await User.findOne({username});
+    // Check availability of username
+    const user = await User.findOne({
+      username: username
+    });
 
     if (user) {
       username = username + Math.floor(Math.random() * 1000);
