@@ -26,7 +26,7 @@ app.register(clerkPlugin);
 app.register(multipartPlugin);
 
 //--------- Hooks ---------
-// app.addHook('preHandler', requireAuth);
+app.addHook('preHandler', requireAuth);
 
 //--------- Routes ---------
 app.get('/', (request, reply) => {
