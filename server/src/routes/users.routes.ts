@@ -1,7 +1,14 @@
 import { FastifyInstance } from "fastify";
-import { getUserData, updateUserData } from "../controllers/users.controller";
+import { requireAuth } from "../hooks/require-auth";
+
+import { discoverUsers, followUser, getUserData, unfollowUser, updateUserData } from "../controllers/users.controller";
 
 export async function userRoutes(app: FastifyInstance) {
-  app.get('/', getUserData);
-  app.put('/', updateUserData);
+  app.addHook('preHandler', requireAuth)
+
+  app.get('/me', getUserData);
+  app.patch('/me', updateUserData);
+  app.get('/discover', discoverUsers);
+  app.post('/:id/follow', followUser);
+  app.delete('/:id/follow', unfollowUser);
 }
