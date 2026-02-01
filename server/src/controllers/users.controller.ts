@@ -195,13 +195,13 @@ export async function followUser(request: FastifyRequest, reply: FastifyReply) {
 
 // Unfollow User
 export async function unfollowUser(request: FastifyRequest, reply: FastifyReply) {
-  const followUserInputSchema = z.object({
+  const unfollowUserParamsSchema = z.object({
     id: z.string()
   });
 
   try {
     const { userId } = getAuth(request);
-    const { id } = followUserInputSchema.parse(request.body);
+    const { id } = unfollowUserParamsSchema.parse(request.params);
 
     const loggedUser = await User.findById(userId);
 
@@ -212,7 +212,7 @@ export async function unfollowUser(request: FastifyRequest, reply: FastifyReply)
       });
     }
 
-    loggedUser.following = loggedUser.following.filter(user => user !== userId);
+    loggedUser.following = loggedUser.following.filter(user => user !== id);
     await loggedUser.save();
 
     const toUser = await User.findById(id);

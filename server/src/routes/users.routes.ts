@@ -4,7 +4,7 @@ import { requireAuth } from "../hooks/require-auth";
 import { discoverUsers, followUser, getUserData, unfollowUser, updateUserData } from "../controllers/users.controller";
 
 export async function userRoutes(app: FastifyInstance) {
-  app.addHook('preHandler', requireAuth)
+  app.addHook('preHandler', requireAuth);
 
   app.get('/me', getUserData);
   app.patch('/me', updateUserData);
