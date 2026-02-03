@@ -8,7 +8,7 @@ export const clerkUserDeletion = inngest.createFunction(
   { event: EVENTS.USER_DELETED },
 
   async ({ event }) => {
-    const { id } = ClerkUserDeletedEventSchema.parse(event.id);
+    const { id } = ClerkUserDeletedEventSchema.parse(event.data);
 
     await deleteUser(id);
   }
