@@ -5,9 +5,9 @@ import fs from "node:fs";
 
 import { User } from "./users.model";
 
-import { parseMultipart } from "../../utils/parse-multpart";
+import { parseMultipart } from "../../shared/http/parse-multpart";
 
-import { buildURL, uploadToImageKit } from "../../services/media/imagekit/imagekit.service";
+import { buildURL, uploadToImageKit } from "../../shared/providers/media/imagekit/imagekit.service";
 
 import {
   CreateUserInput,
