@@ -1,13 +1,12 @@
 import Fastify from 'fastify';
-import { fastifyPlugin } from 'inngest/fastify';
-import { clerkPlugin } from '@clerk/fastify'
 import cors from '@fastify/cors'
 
+// Plugins
 import multipartPlugin from './plugins/multipart';
+import { clerkPlugin } from '@clerk/fastify'
+import { inngestPlugin } from './plugins/inngest';
 
-import { inngest } from './inngest/client';
-import { functions } from './inngest/functions';
-
+// Routes
 import { userRoutes } from './routes/users.routes';
 
 // Init the app
@@ -24,6 +23,8 @@ app.register(cors, {
 app.register(clerkPlugin);
 // Multipart
 app.register(multipartPlugin);
+// Inngest
+app.register(inngestPlugin);
 
 //--------- Routes ---------
 app.get('/', (request, reply) => {
@@ -31,11 +32,5 @@ app.get('/', (request, reply) => {
 });
 
 app.register(userRoutes, { prefix: '/users' });
-
-// Adds the "/api/inngest" routes to server
-app.register(fastifyPlugin, {
-  client: inngest,
-  functions
-});
 
 export default app;
