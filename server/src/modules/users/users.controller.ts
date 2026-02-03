@@ -1,5 +1,4 @@
 import { FastifyRequest, FastifyReply } from "fastify";
-import { getAuth } from "@clerk/fastify";
 
 import fs from "node:fs";
 
@@ -102,7 +101,7 @@ export async function deleteUser(id: string) {
 
 export async function getUserData(request: FastifyRequest, reply: FastifyReply) {
   try {
-    const { userId } = getAuth(request);
+    const userId = request.user?.id;
 
     const user = await User.findById(userId);
 
@@ -120,10 +119,10 @@ export async function getUserData(request: FastifyRequest, reply: FastifyReply) 
 
 export async function updateUserProfile(request: FastifyRequest, reply: FastifyReply) {
   try {
+    const userId = request.user?.id;
     const { fields, files } = await parseMultipart(request);
 
     const { username, full_name, bio, location } = updateProfileInputSchema.parse(fields);
-    const { userId } = getAuth(request);
 
     const tempUser = await User.findById(userId);
 
@@ -232,7 +231,7 @@ export async function updateUserProfile(request: FastifyRequest, reply: FastifyR
 // Find users by username, email, location, name
 export async function discoverUsers(request: FastifyRequest, reply: FastifyReply) {
   try {
-    const { userId } = getAuth(request);
+    const userId = request.user?.id;
     const { search_query } = searchUsersQuerySchema.parse(request.query);
 
     const allUsers = await User.find({
@@ -260,7 +259,7 @@ export async function discoverUsers(request: FastifyRequest, reply: FastifyReply
 // Follow User
 export async function followUser(request: FastifyRequest, reply: FastifyReply) {
   try {
-    const { userId } = getAuth(request);
+    const userId = request.user?.id;
     const { id } = followUserParamsSchema.parse(request.params);
 
     const loggedUser = await User.findById(userId);
@@ -311,7 +310,7 @@ export async function followUser(request: FastifyRequest, reply: FastifyReply) {
 // Unfollow User
 export async function unfollowUser(request: FastifyRequest, reply: FastifyReply) {
   try {
-    const { userId } = getAuth(request);
+    const userId = request.user?.id;
     const { id } = unfollowUserParamsSchema.parse(request.params);
 
     const loggedUser = await User.findById(userId);

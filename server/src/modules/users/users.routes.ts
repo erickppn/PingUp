@@ -1,11 +1,11 @@
 import { FastifyInstance } from "fastify";
-import { requireAuth } from "../../hooks/require-auth";
+import { authPlugin } from "../../plugins/auth";
 
 import * as UsersController from "./users.controller";
 import * as ConnectionsController from "../connections/connections.controller";
 
 export async function userRoutes(app: FastifyInstance) {
-  app.addHook('preHandler', requireAuth);
+  app.register(authPlugin);
 
   app.get('/me', UsersController.getUserData);
   app.get('/me/connections', ConnectionsController.getUserConnections);
