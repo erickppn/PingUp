@@ -9,7 +9,7 @@ export async function userRoutes(app: FastifyInstance) {
 
   app.get('/me', UsersController.getUserData);
   app.get('/me/connections', ConnectionsController.getUserConnections);
-  app.patch('/me', UsersController.updateUserData);
+  app.patch('/me', UsersController.updateUserProfile);
   app.get('/discover', UsersController.discoverUsers);
   app.post('/:id/follow', UsersController.followUser);
   app.delete('/:id/follow', UsersController.unfollowUser);

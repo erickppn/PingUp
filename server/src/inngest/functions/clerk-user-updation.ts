@@ -1,24 +1,20 @@
 import { inngest } from "../client";
 import { EVENTS } from "../events";
 
-import { User } from "../../modules/users/users.model";
+import { ClerkUserUpdatedEventSchema } from "../events/clerk/schemas/user-updated.schema";
+import { mapClerkUserUpdatedtoDomain } from "../events/clerk/user-updated.mapper";
+
+import { updateUserData } from "../../modules/users/users.controller";
 
 export const clerkUserUpdation = inngest.createFunction(
   { id: 'update-user-from-clerk' },
   { event: EVENTS.USER_UPDATED },
 
   async ({ event }) => {
-    const { id, email_addresses, first_name, last_name, image_url } = event.data;
+    const clerkData = ClerkUserUpdatedEventSchema.parse(event.data);
 
-    const updatedUserData = {
-      _id: id,
-      email: email_addresses[0].email_address,
-      full_name: first_name + " " + last_name,
-      profile_picture: image_url,
-    }
+    const data = mapClerkUserUpdatedtoDomain(clerkData);
 
-    await User.findOneAndUpdate({
-     _id: id, 
-    }, updatedUserData);
+    await updateUserData(data);
   }
 );

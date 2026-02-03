@@ -9,12 +9,96 @@ import { parseMultipart } from "../../utils/parse-multpart";
 
 import { buildURL, uploadToImageKit } from "../../services/media/imagekit/imagekit.service";
 
-import { 
-  followUserParamsSchema, 
-  searchUsersQuerySchema, 
-  unfollowUserParamsSchema, 
-  updateUserInputSchema 
+import {
+  CreateUserInput,
+  UpdateUserInput,
+  createUserInputSchema,
+  followUserParamsSchema,
+  searchUsersQuerySchema,
+  unfollowUserParamsSchema,
+  updateProfileInputSchema,
+  updateUserInputSchema,
 } from "./users.schemas";
+
+export async function createUser(data: CreateUserInput) {
+  try {
+    const { id, email, full_name, image_url } = createUserInputSchema.parse(data);
+
+    // Verify if the user already exists
+    const existingUser = await User.findById(id);
+
+    if (existingUser) {
+      return new Error("User already exists");
+    }
+
+    let username = email.split('@')[0];
+
+    // Check availability of username
+    const user = await User.findOne({
+      username: username
+    });
+
+    if (user) {
+      username = username + Math.floor(Math.random() * 1000);
+    }
+
+    const userData = {
+      _id: id,
+      email,
+      full_name,
+      profile_picture: image_url,
+      username
+    }
+
+    await User.findOneAndUpdate({
+      _id: id,
+    }, userData, {
+      upsert: true,
+      new: true
+    });
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+export async function updateUserData(data: UpdateUserInput) {
+  try {
+    const { id, email, full_name, image_url } = updateUserInputSchema.parse(data);
+
+    // Verify if the user exists
+    const existingUser = await User.findById(id);
+
+    if (!existingUser) {
+      return new Error("User not exists");
+    }
+
+    const updatedUserData = {
+      _id: id,
+      email,
+      full_name,
+      profile_picture: image_url,
+    }
+
+    await User.findOneAndUpdate({
+      _id: id,
+    }, updatedUserData);
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+export async function deleteUser(id: string) {
+  // Verify if the user exists
+  const existingUser = await User.findById(id);
+
+  if (!existingUser) {
+    return new Error("User not exists");
+  }
+
+  await User.findOneAndDelete({
+    _id: id,
+  });
+}
 
 export async function getUserData(request: FastifyRequest, reply: FastifyReply) {
   try {
@@ -34,11 +118,11 @@ export async function getUserData(request: FastifyRequest, reply: FastifyReply) 
   }
 }
 
-export async function updateUserData(request: FastifyRequest, reply: FastifyReply) {
+export async function updateUserProfile(request: FastifyRequest, reply: FastifyReply) {
   try {
     const { fields, files } = await parseMultipart(request);
 
-    const { username, full_name, bio, location } = updateUserInputSchema.parse(fields);
+    const { username, full_name, bio, location } = updateProfileInputSchema.parse(fields);
     const { userId } = getAuth(request);
 
     const tempUser = await User.findById(userId);
@@ -95,7 +179,7 @@ export async function updateUserData(request: FastifyRequest, reply: FastifyRepl
       });
 
       newUserData.profile_picture = url;
-      
+
       //delete the temp file
       fs.unlink(profilePic.tempPath, (error) => {
         if (error) console.log(error);
