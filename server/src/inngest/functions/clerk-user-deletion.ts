@@ -1,4 +1,4 @@
-import { User } from "../../models/User";
+import { User } from "../../modules/users/users.model";
 import { inngest } from "../client";
 import { EVENTS } from "../events";
 

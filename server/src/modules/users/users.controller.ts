@@ -1,17 +1,20 @@
 import { FastifyRequest, FastifyReply } from "fastify";
 import { getAuth } from "@clerk/fastify";
-import z from "zod";
 
 import fs from "node:fs";
 
-import { User } from "../models/User";
-import { Connection } from "../models/Connection";
+import { User } from "./users.model";
 
-import { parseMultipart } from "../utils/parse-multpart";
+import { parseMultipart } from "../../utils/parse-multpart";
 
-import { buildURL, uploadToImageKit } from "../services/media/imagekit/imagekit.service";
+import { buildURL, uploadToImageKit } from "../../services/media/imagekit/imagekit.service";
 
-import { updateUserInputSchema } from "../schemas/user.schemas";
+import { 
+  followUserParamsSchema, 
+  searchUsersQuerySchema, 
+  unfollowUserParamsSchema, 
+  updateUserInputSchema 
+} from "./users.schemas";
 
 export async function getUserData(request: FastifyRequest, reply: FastifyReply) {
   try {
@@ -144,13 +147,9 @@ export async function updateUserData(request: FastifyRequest, reply: FastifyRepl
 
 // Find users by username, email, location, name
 export async function discoverUsers(request: FastifyRequest, reply: FastifyReply) {
-  const searchQuerySchema = z.object({
-    search_query: z.string()
-  });
-
   try {
     const { userId } = getAuth(request);
-    const { search_query } = searchQuerySchema.parse(request.query);
+    const { search_query } = searchUsersQuerySchema.parse(request.query);
 
     const allUsers = await User.find({
       $or: [
@@ -176,10 +175,6 @@ export async function discoverUsers(request: FastifyRequest, reply: FastifyReply
 
 // Follow User
 export async function followUser(request: FastifyRequest, reply: FastifyReply) {
-  const followUserParamsSchema = z.object({
-    id: z.string()
-  });
-
   try {
     const { userId } = getAuth(request);
     const { id } = followUserParamsSchema.parse(request.params);
@@ -231,10 +226,6 @@ export async function followUser(request: FastifyRequest, reply: FastifyReply) {
 
 // Unfollow User
 export async function unfollowUser(request: FastifyRequest, reply: FastifyReply) {
-  const unfollowUserParamsSchema = z.object({
-    id: z.string()
-  });
-
   try {
     const { userId } = getAuth(request);
     const { id } = unfollowUserParamsSchema.parse(request.params);
@@ -267,206 +258,6 @@ export async function unfollowUser(request: FastifyRequest, reply: FastifyReply)
       success: false,
       message: "You are no longer following this user"
     })
-  } catch (error) {
-    console.log(error);
-
-    reply.status(401).send({
-      success: false,
-      message: error
-    });
-  }
-}
-
-// Send Connection Request
-export async function sendConnectionRequest(request: FastifyRequest, reply: FastifyReply) {
-  const connectionRequestParamsSchema = z.object({
-    id: z.string()
-  });
-
-  try {
-    const { userId } = getAuth(request);
-    const { id } = connectionRequestParamsSchema.parse(request.params);
-
-    const loggedUser = await User.findById(userId, { _id: true });
-
-    if (!loggedUser) {
-      return reply.status(404).send({
-        success: false,
-        message: "User not found"
-      });
-    }
-
-    // Verify that the user who will receive the request exists.
-    const toConnectUser = await User.findById(id, { _id: true });
-
-    if (!toConnectUser) {
-      return reply.status(404).send({
-        success: false,
-        message: "User not found"
-      });
-    }
-
-    // Check if user has sent more than 20 connection requetes in the last 24 hours
-    const last24Hours = new Date(Date.now() - 24 * 60 * 60 * 1000);
-
-    const connectionRequests = await Connection.find({
-      from_user_id: loggedUser._id,
-      createdAt: { $gt: last24Hours }
-    });
-
-    if (connectionRequests.length > 20) {
-      return reply.status(400).send({
-        success: false,
-        message: "You have sent more than 20 connection requests in last 24 hours"
-      });
-    }
-
-    // Verify if the users are already connected
-    const connection = await Connection.findOne({
-      $or: [
-        {
-          from_user_id: loggedUser._id,
-          to_user_id: toConnectUser._id
-        },
-        {
-          from_user_id: toConnectUser._id,
-          to_user_id: loggedUser._id
-        },
-      ]
-    });
-
-    if (connection && connection.accepted) {
-      return reply.status(400).send({
-        success: false,
-        message: "you are already conneted with this user",
-      });
-    }
-
-    if (connection) {
-      return reply.status(400).send({
-        success: false,
-        message: "Connection request pending",
-      });
-    }
-
-    await Connection.create({
-      from_user_id: loggedUser._id,
-      to_user_id: toConnectUser._id
-    });
-
-    reply.status(201).send({
-      success: true,
-      message: "Connection request sent successfully"
-    });
-
-  } catch (error) {
-    console.log(error);
-
-    reply.status(401).send({
-      success: false,
-      message: error
-    });
-  }
-}
-
-// Get user connections
-export async function getUserConnections(request: FastifyRequest, reply: FastifyReply) {
-  try {
-    const { userId } = getAuth(request);
-
-    const loggedUser = await User.findById(userId).populate('connections followers following', '_id bio full_name profile_picture username');
-
-    if (!loggedUser) {
-      return reply.status(404).send({
-        success: false,
-        message: "User not found"
-      });
-    }
-
-    const connections = loggedUser.connections;
-    const followers = loggedUser.followers;
-    const following = loggedUser.following;
-
-    const pendingConnections = (await Connection.find({
-      to_user_id: loggedUser._id,
-      accepted: false,
-    }).populate(
-      'from_user_id',
-      '_id bio full_name profile_picture username'
-    )).map(connection => connection.from_user_id);
-
-    reply.status(200).send({
-      success: true,
-      connections,
-      followers,
-      following,
-      pendingConnections
-    });
-
-  } catch (error) {
-    console.log(error);
-
-    reply.status(401).send({
-      success: false,
-      message: error
-    });
-  }
-}
-
-// Accept connection request
-export async function acepptConnectionRequest(request: FastifyRequest, reply: FastifyReply) {
-  const acceptConnectionRequestParamsSchema = z.object({
-    id: z.string()
-  });
-
-  try {
-    const { userId } = getAuth(request);
-    const { id } = acceptConnectionRequestParamsSchema.parse(request.params);
-
-    const loggedUser = await User.findById(userId, { _id: true });
-
-    if (!loggedUser) {
-      return reply.status(404).send({
-        success: false,
-        message: "User not found"
-      });
-    }
-
-    const toConnectuser = await User.findById(id);
-
-    if (!toConnectuser) {
-      return reply.status(404).send({
-        success: false,
-        message: "User not found"
-      });
-    }
-
-    const connection = await Connection.findOne({
-      from_user_id: toConnectuser._id,
-      to_user_id: loggedUser._id
-    });
-
-    if (!connection) {
-      return reply.status(400).send({
-        success: false,
-        message: "Connection not found"
-      });
-    }
-
-    loggedUser.connections.push(toConnectuser._id);
-    await loggedUser.save();
-
-    toConnectuser.connections.push(loggedUser._id);
-    await toConnectuser.save();
-
-    connection.accepted = true;
-    await connection.save();
-
-    reply.status(200).send({
-      success: true,
-      message: "Connection accepted successfully"
-    });
-
   } catch (error) {
     console.log(error);
 

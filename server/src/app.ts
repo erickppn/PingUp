@@ -7,7 +7,7 @@ import { clerkPlugin } from '@clerk/fastify'
 import { inngestPlugin } from './plugins/inngest';
 
 // Routes
-import { userRoutes } from './routes/users.routes';
+import { userRoutes } from './modules/users/users.routes';
 
 // Init the app
 const app = Fastify({

@@ -1,7 +1,7 @@
 import { inngest } from "../client";
 import { EVENTS } from "../events";
 
-import { User } from "../../models/User";
+import { User } from "../../modules/users/users.model";
 
 export const clerkUserUpdation = inngest.createFunction(
   { id: 'update-user-from-clerk' },
