@@ -1,9 +1,7 @@
-import { Readable } from "stream"
-
 export type FileData = {
-  stream: Readable,
-  filename: string,
-  fieldname: string
+  fieldname: string;
+  filename: string;
+  filePath: string
 };
 
-export type UploadFile = (args: FileData) => Promise<unknown>;
+export type UploadFile<T = unknown>  = (file: FileData) => Promise<T>;

@@ -1,51 +1,66 @@
 import { FastifyRequest } from "fastify";
-import { Readable } from "node:stream";
+import fs from "node:fs";
+import path from "node:path";
+import { randomUUID } from "node:crypto";
+import { pipeline } from "node:stream/promises";
 
-import { uploadToLocal } from "../services/media/local/upload-local";
-
-type MultipartData = {
-  files: Record<string, unknown[]>;
-  fields: Record<string, string>
+interface UploadedFile {
+  fieldname: string;
+  filename: string;
+  mimetype: string;
+  tempPath: string;
 }
 
-type FileConsumer = (args: {
-  stream: Readable
-  filename: string
-  mimetype: string
-  fieldname: string
-}) => Promise<unknown>
+type MultipartFiles = Record<string, UploadedFile[]>
+type MultipartFields = Record<string, string>
+
+type MultipartDataResult = {
+  files: MultipartFiles;
+  fields: MultipartFields
+}
 
 /**
  * Parses a multipart/form-data request and returns the fields of request.
  *
  * @param request - Fastify request containing multipart data
- * @param consumeFile - Function responsible for consuming the file stream (ex: Imagekit, Amazon S3).
- * If not provided, files will be saved to disk using the default strategy.
- * 
  *
- * @returns An object containing parsed form fields and processed files
  */
 export async function parseMultipart(
   request: FastifyRequest,
-  consumeFile: FileConsumer = uploadToLocal
-): Promise<MultipartData> {
-  const files: Record<string, unknown[]> = {};
-  const fields: Record<string, string> = {};
+): Promise<MultipartDataResult> {
+  const files: MultipartFiles = {};
+  const fields: MultipartFields = {};
+
+  const uploadDir = path.resolve('temp');
+  await fs.promises.mkdir(uploadDir, { recursive: true });
 
   for await (const part of request.parts()) {
-    if (part.type === 'file') {
+    if (part.type === "file") {
       if (!files[part.fieldname]) {
         files[part.fieldname] = [];
       }
 
-      const result = await consumeFile({
+      const safeFileName = randomUUID() + part.filename;
+      const filePath = path.join(uploadDir, safeFileName);
+
+      // Create temp file
+      try {
+        await pipeline(
+          part.file,
+          fs.createWriteStream(filePath)
+        );
+      } catch (error) {
+        console.log(error);
+      }
+
+      const file: UploadedFile = {
         fieldname: part.fieldname,
         filename: part.filename,
         mimetype: part.mimetype,
-        stream: part.file
-      });
+        tempPath: filePath,
+      }
 
-      files[part.fieldname].push(result);
+      files[part.fieldname].push(file);
     } else {
       fields[part.fieldname] = String(part.value);
     }

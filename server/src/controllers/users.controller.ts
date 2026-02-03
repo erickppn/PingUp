@@ -2,16 +2,16 @@ import { FastifyRequest, FastifyReply } from "fastify";
 import { getAuth } from "@clerk/fastify";
 import z from "zod";
 
-import { updateUserInputSchema } from "../schemas/user.schemas";
+import fs from "node:fs";
 
 import { User } from "../models/User";
+import { Connection } from "../models/Connection";
 
 import { parseMultipart } from "../utils/parse-multpart";
 
-import { uploadToImageKit as fileUploader } from "../services/media/imagekit/imagekit.service";
-import { buildURL } from "../services/media/imagekit/imagekit.service";
-import { Connection } from "../models/Connection";
+import { buildURL, uploadToImageKit } from "../services/media/imagekit/imagekit.service";
 
+import { updateUserInputSchema } from "../schemas/user.schemas";
 
 export async function getUserData(request: FastifyRequest, reply: FastifyReply) {
   try {
@@ -33,14 +33,9 @@ export async function getUserData(request: FastifyRequest, reply: FastifyReply) 
 
 export async function updateUserData(request: FastifyRequest, reply: FastifyReply) {
   try {
-    const parsedFields = await parseMultipart(
-      request,
-      fileUploader
-    );
+    const { fields, files } = await parseMultipart(request);
 
-    const { fields, files } = updateUserInputSchema.parse(parsedFields);
-    const { username: inputUsername, bio, location, full_name } = fields;
-
+    const { username, full_name, bio, location } = updateUserInputSchema.parse(fields);
     const { userId } = getAuth(request);
 
     const tempUser = await User.findById(userId);
@@ -49,9 +44,9 @@ export async function updateUserData(request: FastifyRequest, reply: FastifyRepl
       return reply.status(404).send({ success: false, message: "User not found" });
     }
 
-    let newUsername = inputUsername;
+    let newUsername = username;
 
-    !newUsername && (newUsername = tempUser?.username);
+    !newUsername && (newUsername = tempUser.username);
 
     if (tempUser.username !== newUsername) {
       const user = await User.findOne({ username: newUsername });
@@ -71,9 +66,24 @@ export async function updateUserData(request: FastifyRequest, reply: FastifyRepl
       cover_photo: tempUser.cover_photo
     }
 
-    // Update the profile picture
-    if (files.profile) {
-      const url = buildURL(files.profile[0].url, {
+    // Update and upload the profile picture
+    if (files.profile.length > 0) {
+      const profilePic = files.profile[0];
+
+      const uploadedImage = await uploadToImageKit({
+        fieldname: profilePic.fieldname,
+        filename: profilePic.filename,
+        filePath: profilePic.tempPath
+      });
+
+      if (!uploadedImage || !uploadedImage.url) {
+        return reply.status(400).send({
+          success: false,
+          message: "Error while trying to upload the profile image"
+        });
+      }
+
+      const url = buildURL(uploadedImage.url, {
         transformation: [
           { quality: 90 },
           { format: 'webp' },
@@ -82,11 +92,31 @@ export async function updateUserData(request: FastifyRequest, reply: FastifyRepl
       });
 
       newUserData.profile_picture = url;
+      
+      //delete the temp file
+      fs.unlink(profilePic.tempPath, (error) => {
+        if (error) console.log(error);
+      });
     }
 
     // Update the cover picture
-    if (files.cover) {
-      const url = buildURL(files.cover[0].url, {
+    if (files.cover.length > 0) {
+      const coverPic = files.cover[0];
+
+      const uploadedImage = await uploadToImageKit({
+        fieldname: coverPic.fieldname,
+        filename: coverPic.filename,
+        filePath: coverPic.tempPath
+      });
+
+      if (!uploadedImage || !uploadedImage.url) {
+        return reply.status(400).send({
+          success: false,
+          message: "Error while trying to upload the cover image"
+        });
+      }
+
+      const url = buildURL(uploadedImage.url, {
         transformation: [
           { quality: 90 },
           { format: 'webp' },
@@ -95,6 +125,11 @@ export async function updateUserData(request: FastifyRequest, reply: FastifyRepl
       });
 
       newUserData.cover_photo = url;
+
+      //delete the temp file
+      fs.unlink(coverPic.tempPath, (error) => {
+        if (error) console.log(error);
+      });
     }
 
     const user = await User.findByIdAndUpdate(userId, newUserData, { new: true });
