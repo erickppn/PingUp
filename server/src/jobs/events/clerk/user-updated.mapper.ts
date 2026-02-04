@@ -1,5 +1,5 @@
-import { UpdateUserInput } from "../../../modules/users/users.schemas";
-import { ClerkUserUpdatedEventData } from "./schemas/user-updated.schema";
+import { UpdateUserInput } from "@/modules/users/users.schemas";
+import { ClerkUserUpdatedEventData } from "@/jobs/events/clerk/schemas/user-updated.schema";
 
 export function mapClerkUserUpdatedtoDomain(
   data: ClerkUserUpdatedEventData

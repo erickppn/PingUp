@@ -1,5 +1,5 @@
-import { ClerkUserCreatedEventData } from "./schemas/user-created.schema";
-import { CreateUserInput } from "../../../modules/users/users.schemas";
+import { CreateUserInput } from "@/modules/users/users.schemas";
+import { ClerkUserCreatedEventData } from "@/jobs/events/clerk/schemas/user-created.schema";
 
 export function mapClerkUserCreatedtoDomain(
   data: ClerkUserCreatedEventData

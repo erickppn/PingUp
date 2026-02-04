@@ -1,7 +1,9 @@
-import { deleteUser } from "../../modules/users/users.controller";
-import { inngest } from "../client";
-import { EVENTS } from "../events";
-import { ClerkUserDeletedEventSchema } from "../events/clerk/schemas/user-deleted.schema";
+import { inngest } from "@/jobs/client";
+import { EVENTS } from "@/jobs/events";
+
+import { ClerkUserDeletedEventSchema } from "@/jobs/events/clerk/schemas/user-deleted.schema";
+
+import { deleteUser } from "@/modules/users/users.controller";
 
 export const clerkUserDeletion = inngest.createFunction(
   { id: 'delete-user-from-clerk' },

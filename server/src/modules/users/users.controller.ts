@@ -2,11 +2,10 @@ import { FastifyRequest, FastifyReply } from "fastify";
 
 import fs from "node:fs";
 
-import { User } from "./users.model";
+import { User } from "@/modules/users/users.model";
 
-import { parseMultipart } from "../../shared/http/parse-multpart";
-
-import { buildURL, uploadToImageKit } from "../../shared/providers/media/imagekit/imagekit.service";
+import { parseMultipart } from "@/shared/http/parse-multpart";
+import { buildURL, uploadToImageKit } from "@/shared/providers/media/imagekit/imagekit.service";
 
 import {
   CreateUserInput,

@@ -3,7 +3,7 @@ import fs from "node:fs";
 import ImageKit from '@imagekit/nodejs';
 import { Transformation } from '@imagekit/nodejs/resources/shared';
 
-import { UploadFile } from "../media.service";
+import { UploadFile } from "@/shared/providers/media/media.service";
 
 const IMAGEKIT_PRIVATE_KEY = process.env['IMAGEKIT_PRIVATE_KEY'];
 const IMAGE_KIT_BASE_URL = process.env['IMAGE_KIT_BASE_URL'] || '';

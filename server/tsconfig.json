@@ -8,6 +8,15 @@
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "strict": true,
+
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"],
+      // "@utils/*": ["./src/shared/utils"]
+    }
   },
   "include": ["src/**/*"],
+  "tsc-alias": {
+    "resolveFullPaths": true
+  }
 }

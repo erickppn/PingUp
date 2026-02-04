@@ -2,12 +2,12 @@ import Fastify from 'fastify';
 import cors from '@fastify/cors'
 
 // Plugins
-import multipartPlugin from './plugins/multipart';
 import { clerkPlugin } from '@clerk/fastify'
-import { inngestPlugin } from './plugins/inngest';
+import multipartPlugin from '@/plugins/multipart';
+import { inngestPlugin } from '@/plugins/inngest';
 
 // Routes
-import { userRoutes } from './modules/users/users.routes';
+import { userRoutes } from '@/modules/users/users.routes';
 
 // Init the app
 const app = Fastify({

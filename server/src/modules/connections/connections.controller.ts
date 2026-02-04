@@ -1,8 +1,8 @@
 import { FastifyRequest, FastifyReply } from "fastify";
 import { getAuth } from "@clerk/fastify";
 
-import { Connection } from "../connections/connections.model";
-import { User } from "../users/users.model";
+import { Connection } from "@/modules/connections/connections.model";
+import { User } from "@/modules/users/users.model";
 
 import { 
   acceptConnectionRequestParamsSchema, 

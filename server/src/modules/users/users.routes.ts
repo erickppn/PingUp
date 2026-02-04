@@ -1,8 +1,8 @@
 import { FastifyInstance } from "fastify";
-import { authPlugin } from "../../plugins/auth";
+import { authPlugin } from "@/plugins/auth";
 
-import * as UsersController from "./users.controller";
-import * as ConnectionsController from "../connections/connections.controller";
+import * as UsersController from "@/modules/users/users.controller";
+import * as ConnectionsController from "@/modules/connections/connections.controller";
 
 export async function userRoutes(app: FastifyInstance) {
   app.register(authPlugin);
