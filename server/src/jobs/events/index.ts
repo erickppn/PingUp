@@ -6,6 +6,8 @@ export const EVENTS = {
   USER_CREATED: "clerk/user.created",
   USER_UPDATED: "clerk/user.updated",
   USER_DELETED: "clerk/user.deleted",
+  CONNECTION_REQUESTED: "connection/requested",
+  CONNECTION_ACEPPTED: "connection/accepted",
 } as const
 
 export type EventsSchema = {
@@ -19,5 +21,17 @@ export type EventsSchema = {
 
   [EVENTS.USER_DELETED]: {
     data: ClerkUserDeletedEventData
+  },
+
+  [EVENTS.CONNECTION_REQUESTED]: {
+    data: {
+      connectionId: string
+    }
+  },
+
+  [EVENTS.CONNECTION_ACEPPTED]: {
+    data: {
+      connectionId: string
+    }
   }
 }
