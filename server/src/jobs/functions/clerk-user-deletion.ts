@@ -3,7 +3,7 @@ import { EVENTS } from "@/jobs/events";
 
 import { ClerkUserDeletedEventSchema } from "@/jobs/events/clerk/schemas/user-deleted.schema";
 
-import { deleteUser } from "@/modules/users/users.controller";
+import { deleteUserService } from "@/modules/users/services/delete-user.service";
 
 export const clerkUserDeletion = inngest.createFunction(
   { id: 'delete-user-from-clerk' },
@@ -12,6 +12,6 @@ export const clerkUserDeletion = inngest.createFunction(
   async ({ event }) => {
     const { id } = ClerkUserDeletedEventSchema.parse(event.data);
 
-    await deleteUser(id);
+    await deleteUserService(id);
   }
 );

@@ -4,7 +4,7 @@ import { EVENTS } from "@/jobs/events";
 import { ClerkUserUpdatedEventSchema } from "@/jobs/events/clerk/schemas/user-updated.schema";
 import { mapClerkUserUpdatedtoDomain } from "@/jobs/events/clerk/user-updated.mapper";
 
-import { updateUserData } from "@/modules/users/users.controller";
+import { updateUserDataService } from "@/modules/users/services/update-user-data.service";
 
 export const clerkUserUpdation = inngest.createFunction(
   { id: 'update-user-from-clerk' },
@@ -15,6 +15,6 @@ export const clerkUserUpdation = inngest.createFunction(
 
     const data = mapClerkUserUpdatedtoDomain(clerkData);
 
-    await updateUserData(data);
+    await updateUserDataService(data);
   }
 );

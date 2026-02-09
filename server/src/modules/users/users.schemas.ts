@@ -43,6 +43,7 @@ export const updateProfileInputSchema = z.object({
   location: z.string(),
   full_name: z.string(),
 });
+export type UpdateUserProfileInput = z.infer<typeof updateProfileInputSchema>
 
 export const searchUsersQuerySchema = z.object({
   search_query: z.string()

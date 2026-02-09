@@ -4,7 +4,7 @@ import { EVENTS } from "@/jobs/events";
 import { ClerkUserCreatedEventSchema } from "@/jobs/events/clerk/schemas/user-created.schema";
 import { mapClerkUserCreatedtoDomain } from "@/jobs/events/clerk/user-created.mapper";
 
-import { createUser } from "@/modules/users/users.controller";
+import { createUserService } from "@/modules/users/services/create-user.service";
 
 export const clerkUserCreation = inngest.createFunction(
   { id: 'create-user-from-clerk' },
@@ -15,6 +15,6 @@ export const clerkUserCreation = inngest.createFunction(
 
     const data = mapClerkUserCreatedtoDomain(clerkData);
 
-    await createUser(data);
+    await createUserService(data);
   }
 );
