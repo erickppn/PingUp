@@ -6,7 +6,7 @@ type ConnectionRequestTemplateProps = {
   profile_picture: string
 }
 
-export function connectionRequestTemplate({
+export function connectionReminderTemplate({
   toName,
   fromName,
   fromUsername,
@@ -49,7 +49,7 @@ export function connectionRequestTemplate({
           </h2>
 
           <p style="font-size: 14px; line-height: 1.6; color: #374151;">
-            You’ve received a new connection request.
+            Just a reminder — you still have a pending connection request on PingUp.
           </p>
 
           <!-- User card -->
@@ -95,7 +95,7 @@ export function connectionRequestTemplate({
               href="${frontendUrl}/connections"
               style="
                 display: inline-block;
-                background-color: #6d5df6;
+                background-color: #8b5cf6;
                 color: #ffffff;
                 text-decoration: none;
                 padding: 12px 22px;
@@ -104,7 +104,7 @@ export function connectionRequestTemplate({
                 font-weight: 600;
               "
             >
-              View request
+              Review request
             </a>
           </div>
 
