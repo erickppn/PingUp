@@ -4,6 +4,9 @@ import { Connection } from "@/modules/connections/connections.model";
 import { inngest } from "@/jobs/client";
 import { EVENTS } from "@/jobs/events";
 
+import { TargetUserNotFoundError, UserNotFoundError } from "@/shared/errors/user/not-found.error";
+import { ConnectionNotFoundError } from "@/shared/errors/user/connection.error";
+
 type AcceptConnectionParams = {
   loggedUserId: string,
   toConnectUserId: string
@@ -13,13 +16,13 @@ export async function acceptConnectionRequestService({ loggedUserId, toConnectUs
   const loggedUser = await User.findById(loggedUserId, { _id: true, connections: true });
 
   if (!loggedUser) {
-    throw new Error("User not found");
+    throw new UserNotFoundError();
   }
 
   const toConnectUser = await User.findById(toConnectUserId);
 
   if (!toConnectUser) {
-    throw new Error("User not found");
+    throw new TargetUserNotFoundError("connect");
   }
 
   const connection = await Connection.findOne({
@@ -28,7 +31,7 @@ export async function acceptConnectionRequestService({ loggedUserId, toConnectUs
   });
 
   if (!connection) {
-    throw new Error("This connection not found");
+    throw new ConnectionNotFoundError();
   }
 
   loggedUser.connections.push(toConnectUser._id);

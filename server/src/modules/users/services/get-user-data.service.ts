@@ -1,15 +1,12 @@
 import { User } from "@/modules/users/users.model";
+import { UserNotFoundError } from "@/shared/errors/user/not-found.error";
 
-export async function getUserDataService(userId: string | undefined) {
-  try {
-    const user = await User.findById(userId);
+export async function getUserDataService(userId: string) {
+  const user = await User.findById(userId);
 
-    if (!user) {
-      throw new Error("User not found");
-    }
-
-    return user;
-  } catch (error) {
-    throw error;
+  if (!user) {
+    throw new UserNotFoundError();
   }
+
+  return user;
 }

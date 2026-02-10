@@ -6,6 +6,9 @@ import { buildURL, uploadToImageKit } from "@/shared/providers/media/imagekit/im
 
 import { UpdateUserProfileInput } from "@/modules/users/users.schemas";
 
+import { UserNotFoundError } from "@/shared/errors/user/not-found.error";
+import { ImageUploadError } from "@/shared/errors/uploads/image-upload.error";
+
 interface UploadedFile {
   fieldname: string;
   filename: string;
@@ -31,7 +34,7 @@ export async function updateUserProfileService({
   const tempUser = await User.findById(userId);
 
   if (!tempUser) {
-    throw new Error("User not found");
+    throw new UserNotFoundError();
   }
 
   let newUsername = username;
@@ -65,7 +68,7 @@ export async function updateUserProfileService({
     });
 
     if (!uploadedImage || !uploadedImage.url) {
-      throw new Error("Error while trying to upload the profile image");
+      throw new ImageUploadError("profile");
     }
 
     const url = buildURL(uploadedImage.url, {
@@ -93,7 +96,7 @@ export async function updateUserProfileService({
     });
 
     if (!uploadedImage || !uploadedImage.url) {
-      throw new Error("Error while trying to upload the cover image");
+      throw new ImageUploadError("cover");
     }
 
     const url = buildURL(uploadedImage.url, {

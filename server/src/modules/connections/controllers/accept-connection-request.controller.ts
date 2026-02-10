@@ -4,6 +4,9 @@ import { getAuth } from "@clerk/fastify";
 import { acceptConnectionRequestParamsSchema } from "@/modules/connections/connections.schema";
 import { acceptConnectionRequestService } from "@/modules/connections/services/accept-connection-request.service";
 
+import { ZodError } from "zod";
+import { ValidationError } from "@/shared/errors/validations/zod-validation.error";
+
 export async function acceptConnectionRequestController(request: FastifyRequest, reply: FastifyReply) {
   try {
     const { userId } = getAuth(request);
@@ -24,12 +27,9 @@ export async function acceptConnectionRequestController(request: FastifyRequest,
     });
 
   } catch (error) {
-    console.log(error);
-
-    if (error instanceof Error) {
-      reply.status(401).send({ success: false, message: error.message });
+    if (error instanceof ZodError) {
+      throw new ValidationError(error);
     }
-    
     throw error;
   }
 }

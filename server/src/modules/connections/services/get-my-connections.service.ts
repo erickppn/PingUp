@@ -1,11 +1,13 @@
 import { User } from "@/modules/users/users.model";
 import { Connection } from "@/modules/connections/connections.model";
 
+import { UserNotFoundError } from "@/shared/errors/user/not-found.error";
+
 export async function getMyConnectionsService(userId: string) {
   const loggedUser = await User.findById(userId).populate('connections followers following', '_id bio full_name profile_picture username');
 
   if (!loggedUser) {
-    throw new Error("User not found");
+    throw new UserNotFoundError();
   }
 
   const connections = loggedUser.connections;

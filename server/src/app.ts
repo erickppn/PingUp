@@ -5,6 +5,7 @@ import cors from '@fastify/cors'
 import { clerkPlugin } from '@clerk/fastify'
 import multipartPlugin from '@/plugins/multipart';
 import { inngestPlugin } from '@/plugins/inngest';
+import { errorHandler } from '@/plugins/errors';
 
 // Routes
 import { userRoutes } from '@/modules/users/users.routes';
@@ -25,6 +26,9 @@ app.register(clerkPlugin);
 app.register(multipartPlugin);
 // Inngest
 app.register(inngestPlugin);
+
+// Error Handling
+app.setErrorHandler(errorHandler);
 
 //--------- Routes ---------
 app.get('/', (request, reply) => {

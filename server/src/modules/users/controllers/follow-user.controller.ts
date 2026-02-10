@@ -3,6 +3,9 @@ import { FastifyReply, FastifyRequest } from "fastify";
 import { followUserParamsSchema } from "@/modules/users/users.schemas";
 import { followUserService } from "@/modules/users/services/follow-user.service";
 
+import { ZodError } from "zod";
+import { ValidationError } from "@/shared/errors/validations/zod-validation.error";
+
 export async function followUserController(request: FastifyRequest, reply: FastifyReply) {
   try {
     const userId = request.user?.id;
@@ -18,19 +21,13 @@ export async function followUserController(request: FastifyRequest, reply: Fasti
     });
 
     reply.status(200).send({
-      success: false,
+      success: true,
       message: "Now you are following this user"
     })
   } catch (error) {
-    console.log(error);
-
-    if (error instanceof Error) {
-      reply.status(401).send({
-        success: false,
-        message: error.message
-      });
+    if (error instanceof ZodError) {
+      throw new ValidationError(error);
     }
-
     throw error;
   }
 }

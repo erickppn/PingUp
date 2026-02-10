@@ -1,5 +1,9 @@
 import { FastifyReply, FastifyRequest } from "fastify";
+
 import { getMyConnectionsService } from "@/modules/connections/services/get-my-connections.service";
+
+import { ZodError } from "zod";
+import { ValidationError } from "@/shared/errors/validations/zod-validation.error";
 
 export async function getMyConnectionsController(request: FastifyRequest, reply: FastifyReply) {
   try {
@@ -20,12 +24,9 @@ export async function getMyConnectionsController(request: FastifyRequest, reply:
     });
 
   } catch (error) {
-    console.log(error);
-
-    if (error instanceof Error) {
-      reply.status(401).send({ success: false, message: error.message });
+    if (error instanceof ZodError) {
+      throw new ValidationError(error);
     }
-
     throw error;
   }
 }

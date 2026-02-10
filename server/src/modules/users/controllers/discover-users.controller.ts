@@ -3,7 +3,9 @@ import { FastifyReply, FastifyRequest } from "fastify";
 import { searchUsersQuerySchema } from "@/modules/users/users.schemas";
 import { discoverUsersQuery } from "@/modules/users/queries/discover-users.query";
 
-// Find users by username, email, location, name
+import { ZodError } from "zod";
+import { ValidationError } from "@/shared/errors/validations/zod-validation.error";
+
 export async function discoverUsersController(request: FastifyRequest, reply: FastifyReply) {
   try {
     const userId = request.user?.id;
@@ -23,12 +25,9 @@ export async function discoverUsersController(request: FastifyRequest, reply: Fa
       users
     });
   } catch (error) {
-    console.log(error);
-
-    if (error instanceof Error) {
-      reply.status(401).send({ success: false, message: error.message });
+    if (error instanceof ZodError) {
+      throw new ValidationError(error);
     }
-    
     throw error;
   }
 }

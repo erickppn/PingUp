@@ -1,4 +1,5 @@
 import { User } from "@/modules/users/users.model";
+import { UserNotFoundError, TargetUserNotFoundError } from "@/shared/errors/user/not-found.error";
 
 type FollowUsersParams = {
   loggedUserId: string,
@@ -9,17 +10,17 @@ export async function unfollowUserService({ loggedUserId, toUnfollowUserId }: Fo
   const loggedUser = await User.findById(loggedUserId);
 
   if (!loggedUser) {
-    throw new Error("User not found");
+    throw new UserNotFoundError();
   }
-
-  loggedUser.following = loggedUser.following.filter(user => user !== toUnfollowUserId);
-  await loggedUser.save();
 
   const toUnfollowUser = await User.findById(toUnfollowUserId);
 
   if (!toUnfollowUser) {
-    throw new Error("The user you are trying to unfollow does not exist")
+    throw new TargetUserNotFoundError("unfollow");
   }
+
+  loggedUser.following = loggedUser.following.filter(user => user !== toUnfollowUserId);
+  await loggedUser.save();
 
   toUnfollowUser.followers = toUnfollowUser.followers.filter(user => user !== loggedUserId);
   await toUnfollowUser.save();

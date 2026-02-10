@@ -4,6 +4,9 @@ import { Connection } from "@/modules/connections/connections.model";
 import { inngest } from "@/jobs/client";
 import { EVENTS } from "@/jobs/events";
 
+import { TargetUserNotFoundError, UserNotFoundError } from "@/shared/errors/user/not-found.error";
+import { AlreadyConnectedError, ConnectionRequestLimitError, ConnectionRequestPendingError } from "@/shared/errors/user/connection.error";
+
 type CreateConnectionParams = {
   loggedUserId: string,
   toConnectUserId: string
@@ -13,14 +16,14 @@ export async function createConnectionRequestService({ loggedUserId, toConnectUs
   const loggedUser = await User.findById(loggedUserId, { _id: true });
 
   if (!loggedUser) {
-    throw new Error("User not found");
+    throw new UserNotFoundError();
   }
 
   // Verify that the user who will receive the request exists.
   const toConnectUser = await User.findById(toConnectUserId, { _id: true });
 
   if (!toConnectUser) {
-    throw new Error("User not found");
+    throw new TargetUserNotFoundError("connect");
   }
 
   // Check if user has sent more than 20 connection requetes in the last 24 hours
@@ -32,7 +35,7 @@ export async function createConnectionRequestService({ loggedUserId, toConnectUs
   });
 
   if (connectionRequests.length > 20) {
-    throw new Error("You have sent more than 20 connection requests in last 24 hours");
+    throw new ConnectionRequestLimitError();
   }
 
   // Verify if the users are already connected
@@ -50,11 +53,11 @@ export async function createConnectionRequestService({ loggedUserId, toConnectUs
   });
 
   if (connection && connection.accepted) {
-    throw new Error("you are already conneted with this user");
+    throw new AlreadyConnectedError();
   }
 
   if (connection) {
-    throw new Error("Connection request pending");
+    throw new ConnectionRequestPendingError();
   }
 
   const newConnection = await Connection.create({

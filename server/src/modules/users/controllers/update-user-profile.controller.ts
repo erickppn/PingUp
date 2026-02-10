@@ -5,6 +5,9 @@ import { parseMultipart } from "@/shared/http/parse-multpart";
 import { updateProfileInputSchema } from "@/modules/users/users.schemas";
 import { updateUserProfileService } from "@/modules/users/services/update-user-profile.service";
 
+import { ZodError } from "zod";
+import { ValidationError } from "@/shared/errors/validations/zod-validation.error";
+
 export async function updateUserProfileController(request: FastifyRequest, reply: FastifyReply) {
   try {
     const userId = request.user?.id;
@@ -28,12 +31,9 @@ export async function updateUserProfileController(request: FastifyRequest, reply
 
     reply.status(200).send({ success: true, user, message: "Profile updated successfully" });
   } catch (error) {
-    console.log(error);
-
-    if (error instanceof Error) {
-      reply.status(401).send({ success: false, message: error.message });
+    if (error instanceof ZodError) {
+      throw new ValidationError(error);
     }
-
     throw error;
   }
 }

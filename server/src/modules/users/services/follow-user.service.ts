@@ -1,5 +1,8 @@
 import { User } from "@/modules/users/users.model";
 
+import { UserNotFoundError, TargetUserNotFoundError } from "@/shared/errors/user/not-found.error";
+import { AlreadyFollowingUserError, CannotFollowYourselfError } from "@/shared/errors/user/follow.error";
+
 type FollowUsersParams = {
   loggedUserId: string,
   toFollowUserId: string
@@ -9,22 +12,26 @@ export async function followUserService({ loggedUserId, toFollowUserId }: Follow
   const loggedUser = await User.findById(loggedUserId);
 
   if (!loggedUser) {
-    throw new Error("User not found");
+    throw new UserNotFoundError();
   }
 
+  if (toFollowUserId === loggedUser._id) {
+    throw new CannotFollowYourselfError();
+  }
+  
   if (loggedUser.following.includes(toFollowUserId)) {
-    throw new Error("You are already follwing this user");
+    throw new AlreadyFollowingUserError();
   }
-
-  loggedUser.following.push(toFollowUserId);
-  await loggedUser.save();
 
   const tofollowUser = await User.findById(toFollowUserId);
 
   if (!tofollowUser) {
-    throw new Error("The user you are trying to follow does not exist.");
+    throw new TargetUserNotFoundError("follow");
   }
 
-  tofollowUser.followers.push(loggedUserId);
+  tofollowUser.followers.push(loggedUser._id);
   await tofollowUser.save();
+
+  loggedUser.following.push(tofollowUser._id);
+  await loggedUser.save();
 }
