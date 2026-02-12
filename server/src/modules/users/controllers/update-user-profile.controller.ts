@@ -12,7 +12,12 @@ import { ValidationError } from "@/shared/errors/validations/zod-validation.erro
 
 export async function updateUserProfileController(request: FastifyRequest, reply: FastifyReply) {
   const userId = request.user?.id;
-  const { fields, files } = await parseMultipart(request);
+  const { fields, files } = await parseMultipart(request, {
+    maxFiles: {
+      profile: 1,
+      cover: 1,
+    }
+  });
 
   try {
     const { username, full_name, bio, location } = updateProfileInputSchema.parse(fields);

@@ -1,5 +1,3 @@
-import fs from "node:fs";
-
 import { User } from "@/modules/users/users.model";
 
 import { FileData } from "@/shared/providers/media/media.provider";

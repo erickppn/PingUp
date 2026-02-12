@@ -11,7 +11,11 @@ import { cleanupTempFiles } from "@/shared/utils/cleanup-temp-files";
 
 export async function addPostController(request: FastifyRequest, reply: FastifyReply) {
   const userId = request.user?.id;
-  const { fields, files } = await parseMultipart(request);
+  const { fields, files } = await parseMultipart(request, {
+    maxFiles: {
+      images: 4
+    }
+  });
 
   const images = files.images || [];
 
