@@ -1,7 +1,15 @@
 export type FileData = {
   fieldname: string;
   filename: string;
-  filePath: string
+  tempPath: string;
+  mimetype: string;
 };
 
-export type UploadFile<T = unknown>  = (file: FileData) => Promise<T>;
+export type UploadedFile = {
+  fieldname: string;
+  filename: string;
+  mimetype: string;
+  url: string;
+}
+
+export type UploadFile  = (file: FileData) => Promise<UploadedFile>;

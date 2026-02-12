@@ -5,14 +5,16 @@ import { parseMultipart } from "@/shared/http/parse-multpart";
 import { updateProfileInputSchema } from "@/modules/users/users.schemas";
 import { updateUserProfileService } from "@/modules/users/services/update-user-profile.service";
 
+import { cleanupTempFiles } from "@/shared/utils/cleanup-temp-files";
+
 import { ZodError } from "zod";
 import { ValidationError } from "@/shared/errors/validations/zod-validation.error";
 
 export async function updateUserProfileController(request: FastifyRequest, reply: FastifyReply) {
-  try {
-    const userId = request.user?.id;
-    const { fields, files } = await parseMultipart(request);
+  const userId = request.user?.id;
+  const { fields, files } = await parseMultipart(request);
 
+  try {
     const { username, full_name, bio, location } = updateProfileInputSchema.parse(fields);
 
     if (!userId) {
@@ -20,7 +22,7 @@ export async function updateUserProfileController(request: FastifyRequest, reply
     }
 
     const user = await updateUserProfileService({
-      userId,
+      loggedUserId: userId,
       username,
       full_name,
       bio,
@@ -35,5 +37,9 @@ export async function updateUserProfileController(request: FastifyRequest, reply
       throw new ValidationError(error);
     }
     throw error;
+  } finally {
+    const tempFiles = [...files.profile, ...files.cover];
+    
+    await cleanupTempFiles(tempFiles);
   }
 }

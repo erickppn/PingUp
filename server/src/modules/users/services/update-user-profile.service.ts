@@ -2,28 +2,21 @@ import fs from "node:fs";
 
 import { User } from "@/modules/users/users.model";
 
+import { FileData } from "@/shared/providers/media/media.provider";
 import { buildURL, uploadToImageKit } from "@/shared/providers/media/imagekit/imagekit.provider";
 
 import { UpdateUserProfileInput } from "@/modules/users/users.schemas";
 
 import { UserNotFoundError } from "@/shared/errors/user/not-found.error";
-import { ImageUploadError } from "@/shared/errors/uploads/image-upload.error";
-
-interface UploadedFile {
-  fieldname: string;
-  filename: string;
-  mimetype: string;
-  tempPath: string;
-}
 
 type UpdateUserProfileData = UpdateUserProfileInput & {
-  userId: string,
-  profileImage?: UploadedFile,
-  coverImage?: UploadedFile,
+  loggedUserId: string,
+  profileImage?: FileData,
+  coverImage?: FileData,
 }
 
 export async function updateUserProfileService({
-  userId,
+  loggedUserId,
   full_name,
   username,
   bio,
@@ -31,7 +24,7 @@ export async function updateUserProfileService({
   coverImage,
   profileImage
 }: UpdateUserProfileData) {
-  const tempUser = await User.findById(userId);
+  const tempUser = await User.findById(loggedUserId);
 
   if (!tempUser) {
     throw new UserNotFoundError();
@@ -64,12 +57,9 @@ export async function updateUserProfileService({
     const uploadedImage = await uploadToImageKit({
       fieldname: profileImage.fieldname,
       filename: profileImage.filename,
-      filePath: profileImage.tempPath
+      tempPath: profileImage.tempPath,
+      mimetype: profileImage.mimetype
     });
-
-    if (!uploadedImage || !uploadedImage.url) {
-      throw new ImageUploadError("profile");
-    }
 
     const url = buildURL(uploadedImage.url, {
       transformation: [
@@ -80,11 +70,6 @@ export async function updateUserProfileService({
     });
 
     newUserData.profile_picture = url;
-
-    //delete the temp file
-    fs.unlink(profileImage.tempPath, (error) => {
-      if (error) console.log(error);
-    });
   }
 
   // Update the cover picture
@@ -92,12 +77,9 @@ export async function updateUserProfileService({
     const uploadedImage = await uploadToImageKit({
       fieldname: coverImage.fieldname,
       filename: coverImage.filename,
-      filePath: coverImage.tempPath
+      tempPath: coverImage.tempPath,
+      mimetype: coverImage.mimetype
     });
-
-    if (!uploadedImage || !uploadedImage.url) {
-      throw new ImageUploadError("cover");
-    }
 
     const url = buildURL(uploadedImage.url, {
       transformation: [
@@ -108,12 +90,7 @@ export async function updateUserProfileService({
     });
 
     newUserData.cover_photo = url;
-
-    //delete the temp file
-    fs.unlink(coverImage.tempPath, (error) => {
-      if (error) console.log(error);
-    });
   }
 
-  return await User.findByIdAndUpdate(userId, newUserData, { new: true });
+  return await User.findByIdAndUpdate(loggedUserId, newUserData, { new: true });
 }

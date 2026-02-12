@@ -9,6 +9,7 @@ import { errorHandler } from '@/plugins/errors';
 
 // Routes
 import { userRoutes } from '@/modules/users/users.routes';
+import { postsRoutes } from '@/modules/posts/posts.routes';
 
 // Init the app
 const app = Fastify({
@@ -36,5 +37,6 @@ app.get('/', (request, reply) => {
 });
 
 app.register(userRoutes, { prefix: '/users' });
+app.register(postsRoutes, { prefix: '/posts' });
 
 export default app;

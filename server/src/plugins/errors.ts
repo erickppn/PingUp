@@ -26,6 +26,8 @@ export function errorHandler(error: FastifyError, request: FastifyRequest, reply
     });
   }
 
+  console.log(error);
+  
   return reply.status(500).send({
     success: false,
     code: "INTERNAL_ERROR",
