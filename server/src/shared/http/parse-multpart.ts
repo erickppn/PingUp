@@ -83,7 +83,7 @@ export async function parseMultipart(
             fs.createWriteStream(filePath)
           );
         } catch (error) {
-          new AppError("Failed to process uploaded file", 500, "FILE_PROCESSING_ERRO");
+          errorToThrow = new AppError("Failed to process uploaded file", 500, "FILE_PROCESSING_ERRO");
         }
 
         const file: UploadedFile = {

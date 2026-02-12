@@ -6,6 +6,7 @@ import { discoverUsersController } from "@/modules/users/controllers/discover-us
 import { followUserController } from "@/modules/users/controllers/follow-user.controller";
 import { unfollowUserController } from "@/modules/users/controllers/unfollow-user.controller";
 import { updateUserProfileController } from "@/modules/users/controllers/update-user-profile.controller";
+import { getUserProfileController } from "@/modules/users/controllers/get-user-profile.controller";
 
 import { createConnectionRequestController } from "@/modules/connections/controllers/send-connection-request.controller";
 import { getMyConnectionsController } from "@/modules/connections/controllers/get-my-connections.controller";
@@ -22,4 +23,5 @@ export async function userRoutes(app: FastifyInstance) {
   app.delete('/:id/follow', unfollowUserController);
   app.post('/:id/request-connection', createConnectionRequestController);
   app.patch('/:id/accept-connection', acceptConnectionRequestController);
+  app.get('/:id/profile', getUserProfileController);
 }
