@@ -8,6 +8,7 @@ export const EVENTS = {
   USER_DELETED: "clerk/user.deleted",
   CONNECTION_REQUESTED: "connection/requested",
   CONNECTION_ACEPPTED: "connection/accepted",
+  STORY_CREATED: "story/created"
 } as const
 
 export type EventsSchema = {
@@ -32,6 +33,12 @@ export type EventsSchema = {
   [EVENTS.CONNECTION_ACEPPTED]: {
     data: {
       connectionId: string
+    }
+  },
+
+  [EVENTS.STORY_CREATED]: {
+    data: {
+      storyId: string
     }
   }
 }

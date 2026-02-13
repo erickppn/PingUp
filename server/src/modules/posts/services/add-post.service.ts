@@ -39,12 +39,7 @@ export async function addPostService({
 
   const imagesUrls = await Promise.all(
     images.map(async (image) => {
-      const uploadedImage = await uploadToImageKit({
-        fieldname: image.fieldname,
-        filename: image.filename,
-        mimetype: image.mimetype,
-        tempPath: image.tempPath
-      });
+      const uploadedImage = await uploadToImageKit(image);
 
       const url = buildURL(uploadedImage.url, {
         transformation: [
