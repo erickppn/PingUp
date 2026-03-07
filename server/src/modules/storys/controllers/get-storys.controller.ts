@@ -1,7 +1,5 @@
 import { FastifyRequest, FastifyReply } from "fastify";
-import { ZodError } from "zod";
 
-import { ValidationError } from "@/shared/errors/validations/zod-validation.error";
 import { getStorysService } from "@/modules/storys/services/get-storys.service";
 
 export async function getStorysController(request: FastifyRequest, reply: FastifyReply) {
@@ -19,9 +17,6 @@ export async function getStorysController(request: FastifyRequest, reply: Fastif
       storys
     });
   } catch (error) {
-    if (error instanceof ZodError) {
-      throw new ValidationError(error);
-    }
     throw error;
   }
 }
